@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mihraç'a Doğum Günü Sürprizi 🎉</title>
+  <style>
+    :root{
+      --bg1:#0f1025;--bg2:#1a1c3a;--card:#ffffff0f;--text:#f7f7fb;--accent:#ff72d2;--muted:#c6c7d1;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;display:grid;place-items:center;
+      background: radial-gradient(1200px 800px at 20% 0%, #2a2257 0%, var(--bg1) 30%, var(--bg2) 100%);
+      color:var(--text);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      overflow:hidden;
+    }
+    .card{
+      width:min(92vw,720px);min-height:320px;border-radius:28px;backdrop-filter: blur(10px);
+      background:linear-gradient(180deg, #ffffff22, #ffffff08);border:1px solid #ffffff2a;
+      box-shadow:0 30px 80px #00000066;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:28px;text-align:center;
+      position:relative;
+    }
+    h1{margin:0;font-size:clamp(28px,5vw,40px);font-weight:800;letter-spacing:.3px}
+    p{margin:0;font-size:clamp(16px,2.5vw,18px);color:var(--muted)}
+    .btn{
+      appearance:none;border:none;border-radius:14px;padding:14px 20px;font-size:18px;font-weight:700;cursor:pointer;
+      background:linear-gradient(135deg,#ffb7f0 0%,#ff72d2 40%,#8a7dff 100%);
+      color:#1a1333;box-shadow:0 8px 24px #ff72d266;transition: transform .12s ease, box-shadow .12s ease;user-select:none
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px #ff72d28c}
+    .btn:active{transform:translateY(0)}
+    .ghost-btn{
+      background:#ffffff10;color:#fff;border:1px solid #ffffff2a
+    }
+    .gift{
+      display:inline-grid;place-items:center;width:140px;height:140px;border-radius:26px;border:1px solid #ffffff30;background:#ffffff12;
+      font-size:64px;box-shadow: inset 0 0 0 2px #ffffff10;
+      animation:float 3s ease-in-out infinite;
+    }
+    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+    .accent{
+      background:linear-gradient(90deg,#ffd3f8,#fff);-webkit-background-clip:text;background-clip:text;color:transparent
+    }
+    .steps{display:flex;gap:12px;position:absolute;bottom:16px;left:0;right:0;justify-content:center;opacity:.5;font-size:12px}
+    .dot{width:8px;height:8px;border-radius:99px;background:#ffffff33}
+    .dot.active{background:#ff72d2}
+    canvas#confetti{position:fixed;inset:0;pointer-events:none}
+    .hearts{position:fixed;inset:0;pointer-events:none}
+    .heart{position:absolute;font-size:18px;opacity:0;animation: rise 2.2s ease-in forwards}
+    @keyframes rise{0%{transform:translateY(12px) scale(.9);opacity:0}25%{opacity:1}100%{transform:translateY(-120px) scale(1.2);opacity:0}}
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="card" id="card">
+    <div id="content"></div>
+    <div id="actions"></div>
+    <div class="steps" aria-hidden="true">
+      <span class="dot" id="d0"></span>
+      <span class="dot" id="d1"></span>
+      <span class="dot" id="d2"></span>
+      <span class="dot" id="d3"></span>
+      <span class="dot" id="d4"></span>
+    </div>
+  </div>
+  <div class="hearts" id="hearts"></div>
+
+  <script>
+    const content = document.getElementById('content');
+    const actions = document.getElementById('actions');
+    const dots = [0,1,2,3,4].map(i=>document.getElementById('d'+i));
+    let step=0;
+
+    function setStep(i){
+      step=i; dots.forEach((d,idx)=>d.classList.toggle('active', idx===i));
+      actions.innerHTML='';
+      if(i===0){
+        content.innerHTML = `
+          <div class="gift" aria-label="Hediye Kutusu" title="Tıkla">
+            🎁
+          </div>
+          <p>Kutuyu açmak için tıkla!</p>
+        `;
+        content.querySelector('.gift').onclick=()=>{ burstConfetti(); setTimeout(()=>setStep(1), 200); };
+      }
+      if(i===1){
+        content.innerHTML = `<h1><span class="accent">seni çok seviyorum Mihraç</span> 💖</h1>`;
+        const b = makeBtn('İnanmıyorsan tıkla', ()=>{ setStep(2); });
+        actions.appendChild(b);
+      }
+      if(i===2){
+        content.innerHTML = `<h1>Neden bana inanmadın <span class="accent">nanik</span> 😝</h1>`;
+        const b = makeBtn('Tıkla', ()=>{ setStep(3); });
+        actions.appendChild(b);
+      }
+      if(i===3){
+        content.innerHTML = `<h1>\"dünyanın en güzel kızının doğum günü tabii ki de kimi seveceğiz\" 💫</h1>`;
+        floatingHearts();
+        burstConfetti(2);
+        const b = makeBtn('Doğum günü dileğini görmek için tıkla', ()=>{ setStep(4); });
+        actions.appendChild(b);
+      }
+      if(i===4){
+        content.innerHTML = `
+          <h1>Mutlu yıllar Mihraç! 🎂💐<br>Hayallerinin hepsi gerçekleşsin, yüzün hep gülsün ve kalbin hep sevgiyle dolsun. 💖</h1>`;
+        const b = makeBtn('Başa dön', ()=>{ setStep(0); });
+        b.classList.add('ghost-btn');
+        actions.appendChild(b);
+      }
+    }
+
+    function makeBtn(txt, onClick){
+      const b=document.createElement('button'); b.className='btn'; b.textContent=txt; b.onclick=onClick; return b;
+    }
+
+    // --- Confetti ---
+    const c = document.getElementById('confetti');
+    const ctx = c.getContext('2d');
+    function resize(){ c.width = innerWidth; c.height = innerHeight; }
+    addEventListener('resize', resize); resize();
+
+    const COLORS = ['#ff72d2','#8a7dff','#6be4ff','#ffd166','#06d6a0','#ef476f'];
+
+    function burstConfetti(mult=1){
+      const particles=[];
+      const N = Math.floor(150*mult);
+      for(let i=0;i<N;i++){
+        particles.push({
+          x: c.width/2 + (Math.random()*120-60),
+          y: c.height/2 - 40,
+          vx: (Math.random()-0.5)*8,
+          vy: - (Math.random()*7 + 3),
+          g: 0.18 + Math.random()*0.12,
+          s: Math.random()*8+4,
+          r: Math.random()*Math.PI,
+          vr: (Math.random()-0.5)*0.4,
+          alpha: 1,
+          color: COLORS[(Math.random()*COLORS.length)|0],
+          shape: Math.random()<0.5?'rect':'circle'
+        });
+      }
+      const start = performance.now();
+      function frame(t){
+        const dt = (t - (frame.lt||t))/16; frame.lt = t;
+        ctx.clearRect(0,0,c.width,c.height);
+        particles.forEach(p=>{
+          p.vy += p.g*dt; p.x += p.vx*dt; p.y += p.vy*dt; p.r += p.vr*dt; p.alpha -= 0.008*dt;
+          ctx.globalAlpha = Math.max(p.alpha,0);
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.color;
+          if(p.shape==='rect'){ ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s/2); }
+          else{ ctx.beginPath(); ctx.arc(0,0,p.s/2,0,Math.PI*2); ctx.fill(); }
+          ctx.restore();
+        });
+        ctx.globalAlpha=1;
+        for(let i=particles.length-1;i>=0;i--){ if(particles[i].alpha<=0 || particles[i].y>c.height+60){ particles.splice(i,1); } }
+        if(particles.length>0 && performance.now()-start<3500){ requestAnimationFrame(frame); }
+        else{ ctx.clearRect(0,0,c.width,c.height); }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // Floating hearts on final step
+    const heartsWrap = document.getElementById('hearts');
+    function floatingHearts(){
+      for(let i=0;i<24;i++){
+        const e = document.createElement('div');
+        e.className='heart';
+        e.textContent = Math.random()<0.5?'💖':'💘';
+        e.style.left = (20 + Math.random()*60) + 'vw';
+        e.style.bottom = (10 + Math.random()*30) + 'vh';
+        e.style.animationDelay = (Math.random()*1.2)+'s';
+        e.style.fontSize = (16 + Math.random()*20)+'px';
+        heartsWrap.appendChild(e);
+        setTimeout(()=>heartsWrap.removeChild(e), 2600);
+      }
+    }
+
+    // init
+    setStep(0);
+  </script>
+</body>
+</html>
